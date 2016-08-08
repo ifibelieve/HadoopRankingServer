@@ -105,7 +105,7 @@ public class SumPoint {
         job.setCombinerClass(CombinerClass.class);
         job.setReducerClass(ReducerClass.class);
         job.setInputFormatClass(TextInputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
+        job.setOutputFormatClass(SequenceFileOutputFormat.class);
         job.setOutputKeyClass(LongWritable.class);
         job.setOutputValueClass(LongWritable.class);
         

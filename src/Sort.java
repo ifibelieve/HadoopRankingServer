@@ -24,20 +24,13 @@ import org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner;
 public class Sort {
     
     public static class MapperClass
-    extends Mapper<LongWritable, Text, LongWritable, LongWritable>{
+    extends Mapper<LongWritable, LongWritable, LongWritable, LongWritable>{
         
-        private LongWritable pt = new LongWritable(0);
-        private LongWritable id = new LongWritable(0);
-        
-        public void map(LongWritable key, Text value, Context context) throws
+        public void map(LongWritable key, LongWritable value, Context context) throws
         IOException, InterruptedException {
                 
-            String [] splits = value.toString().split("\t");
-            pt.set(Long.parseLong(splits[0]));
-            id.set(Long.parseLong(splits[1]));
-                
             try {
-                context.write(pt, id);
+                context.write(key, value);
             } catch (Exception e) {
                 System.err.println("[Sort map] " + e.getMessage());
             }
@@ -142,7 +135,7 @@ public class Sort {
         
         job.setOutputKeyClass(LongWritable.class);
         job.setOutputValueClass(LongWritable.class);
-        job.setInputFormatClass(TextInputFormat.class);
+        job.setInputFormatClass(SequenceFileInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
         
         FileInputFormat.addInputPath(job, new Path(input));
@@ -152,9 +145,10 @@ public class Sort {
         job.setSortComparatorClass(SortKeyComparator.class);
         TotalOrderPartitioner.setPartitionFile(job.getConfiguration(), new Path("input", "partitioning"));
         
-        double  pcnt        = 0.1;
+        double  pcnt        = 0.01;
         int     numSample   = numReducer;
         int     maxSplit    = numReducer - 1;
+        if (maxSplit <= 0) { maxSplit = Integer.MAX_VALUE; }
         InputSampler.Sampler sampler = new InputSampler.RandomSampler(pcnt, numSample, maxSplit);
         try {
             InputSampler.writePartitionFile(job, sampler);
