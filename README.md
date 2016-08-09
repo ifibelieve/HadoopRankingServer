@@ -1,20 +1,24 @@
-# HadoopRankingServer
 HadoopRankingServer
 
+Sum->Sort
 
-Sum->Sort->Rank
+Sum 
 
+1. Map     - (key:line, value:"id    point") -> (key:id, value:point)
 
-1.Sum  : (id : point) -> (sum(point) : list(id))
+2. Combine - (key:id, value:point) -> (key:id, value:sum(point))
 
-2.Sort : (sum(point) : list(id)) -> TotalOrderPartitioner -> (rank : id, sum(point) )
+3. Reduce  - (key:id, value:sum(point)) -> (key:sum(point) , value:key)
 
+[[https://github.com/ifibelieve/HadoopRankingServer/blob/master/wiki/sum-result.png]]
 
-javac -cp $(bin/hadoop classpath) -d HadoopRankingServer/class/ HadoopRankingServer/src/*.java
+Sort
 
-jar -cvf HadoopRankingServer/Rank.jar -C HadoopRankingServer/class .
+1. Map     - Indentical
 
-bin/hadoop jar HadoopRankingServer/Rank.jar my.hadoop.test.Rank input out1 out2 10
+2. Shuffle - TotalOrderPartitioner 
 
-bin/hadoop fs -cat ./out2/*
+3. Reduce  - (key:sum(point), value:list(id))-> (key:"rank    ID:id    PT:sum(point)", value:null)
 
+[[https://github.com/ifibelieve/HadoopRankingServer/blob/master/wiki/partition.png]]
+[[https://github.com/ifibelieve/HadoopRankingServer/blob/master/wiki/sort-result.png]]
